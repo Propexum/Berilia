@@ -22,24 +22,38 @@ const map = new maplibregl.Map({
     style: STYLE,
     center: [start_pos.x, start_pos.y],
     zoom: start_pos.z,
+    minZoom: 5.5,
     bearing: 0,
     pitch: 0
 })
 
 const colourRamp = d3.scaleSequential(d3.interpolateSpectral).domain([0,1])
 
+function mean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length
+}
+
+function median(arr) {
+    arr.sort((a, b) => a - b)
+    const mid = Math.floor(arr.length / 2)
+    if (arr.length % 2) return arr[mid]
+    return (arr[mid - 1] + arr[mid]) / 2
+}
+
 /* convert from "rgba(r,g,b,a)" string to [r,g,b] */
 const getColour = v => Object.values(d3.color(colourRamp(v))).slice(0,-1)
 const getIrisData = csvmap => {
     return new MVTLayer({
     id: 'IrisLayer',
-    minZoom: 0,
+    minZoom: 6,
     maxZoom: 9,
     data: 'data/shapefiles/CONTOURS-IRIS_2-1_SHP_LAMB93_FXX-2020/tiles/{z}/{x}/{y}.pbf',
     extruded: false,
     stroked: true,
     getFillColor: d => {
-        const v = csvmap.get(parseInt(d.properties.CODE_IRIS))
+        const codes = d.properties.CODE_IRIS.split(",")
+        const vs = codes.map(x => csvmap.get(parseInt(x)))
+        const v = median(vs)
         return v == undefined ? [255, 255, 255, 0] : getColour(v)
     },
     pickable: true
@@ -128,5 +142,5 @@ makeLegend()
 map.on('moveend', () => {
     const pos = map.getCenter()
     const z = map.getZoom()
-    window.location.hash = `x=${pos.lng}&y=${pos.lat}&z=${z}`
+    window.location.hash = `x=${pos.lng.toFixed(2)}&y=${pos.lat.toFixed(2)}&z=${z.toFixed(2)}`
 })

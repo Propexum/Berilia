@@ -31,7 +31,7 @@ IRIS contour shapefiles come from https://geoservices.ign.fr/contoursiris and th
 convert lambert 93 (or other) shapefile with wgs84 geojson then make tiles
 ```
 ogr2ogr -f GeoJSON -t_srs EPSG:4326 iris_2020.geojson CONTOURS-IRIS.shp 
-tippecanoe -zg --coalesce-smallest-as-needed --no-tile-compression -e tiles iris_2020.geojson # pay attention to min/max zoom in tiles directory and set to right value in deck.gl
+tippecanoe -Z6 -zg --no-tile-size-limit --coalesce-smallest-as-needed --no-tile-compression -ECODE_IRIS :comma -e tiles iris_2020.geojson # pay attention to min/max zoom in tiles directory and set to right value in deck.gl
 ```
 
 # Deployment
