@@ -75,7 +75,7 @@ https://o.blanthorn.com/france-iris/map/?expression="P20_RP_VOIT2P/"P20_RP"#x=0.
 
 
 - households with 2+ cars scaled by quantiles
-https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RP_VOIT2P"/"P20_RP"#x=0.33&y=47.35&z=6.83
 
 
 - absolute number of second homes
