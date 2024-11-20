@@ -3,11 +3,14 @@
     "license": "BSD-2-Clause",
     "scripts": {
         "serve_memleak": "yarn esbuild --bundle src/app.js --outfile=map/app.js --servedir=map",
-        "build": "yarn esbuild --minify --bundle src/app.js --outfile=map/app.js",
-        "watch": "yarn esbuild --minify --watch --bundle src/app.js --outfile=map/app.js",
+        "build": "node build.js",
+        "watch": "ls src/app.js | entr yarn build",
         "serve": "yarn deno run --lock=deno.lock --allow-net --allow-read srv/watcher.js"
     },
     "dependencies": {
+        "@finos/perspective": "^3.1.6",
+        "@finos/perspective-esbuild-plugin": "^3.1.6",
+        "@finos/perspective-viewer": "^3.1.6",
         "@loaders.gl/csv": "^4.2.1",
         "d3": "^7.9.0",
         "d3-dsv": "^3.0.1",

@@ -52,7 +52,7 @@ const getIrisData = csvmap => {
     stroked: true,
     getFillColor: d => {
         const codes = d.properties.CODE_IRIS.split(",")
-        const vs = codes.map(x => csvmap.get(parseInt(x)))
+        const vs = codes.map(x => csvmap.get(x))
         const v = median(vs)
         return v == undefined ? [255, 255, 255, 0] : getColour(v)
     },
@@ -60,12 +60,16 @@ const getIrisData = csvmap => {
 })}
 
 function getTooltip({object}) {
+    if (!object) return
     const toDivs = kv => {
         return `<div>${kv[0]}: ${typeof(kv[1]) == "number" ? parseFloat(kv[1].toPrecision(3)) : kv[1]}</div>` // parseFloat is a hack to bin scientific notation
     }
-    return object && {
-        // html: `<div>${(object.value).toPrecision(2)}</div>`,
-        html: Object.entries({...object.properties, percent_zero_voitures: csvmap.get(parseInt(object.properties.CODE_IRIS))}).map(toDivs).join(" "),
+    const keyname = expression ?? "percent_zero_voitures"
+    const tooltip = doQuantiles ? 
+        Object.entries({...object.properties, [keyname]: rawmap?.get(object.properties.CODE_IRIS), [keyname + "_quantile"]: csvmap?.get(object.properties.CODE_IRIS)}).map(toDivs).join(" ")
+        : Object.entries({...object.properties, [keyname]: csvmap?.get(object.properties.CODE_IRIS)}).map(toDivs).join(" ")
+    return {
+        html: tooltip,
         style: {
             backgroundColor: '#fff',
             fontFamily: 'sans-serif',
@@ -108,39 +112,105 @@ const choochoo = new TileLayer({
 })
 
 let csvmap = new Map()
-const update = async () => {
-    const csvdata = (await load("data/iris_data.csv", CSVLoader)).data
+let rawmap = new Map()
+window.csvmap = csvmap
+const params = new URLSearchParams(window.location.search)
+const expression = params.get('expression') 
+
+
+window.d3 = d3
+window.observablehq = observablehq
+const doQuantiles = params.get('quantiles') != null
+async function hardMode() {
+    const perspective = await import('@finos/perspective')
+    await import('@finos/perspective-viewer')
+    perspective.worker().then(async (worker) => {
+        window.w = worker
+        const arrow = await fetch("data/base-ic-logement-2020.arrow")
+        const arrowData = await arrow.arrayBuffer()
+        const table = await w.table(arrowData)
+        window.table = table
+
+        const expression = params.get('expression') ?? '1 - ("P20_RP_VOIT1P" / "P20_RP")' // technically unreachable but osef
+        const view = await table.view({
+            columns: ["IRIS", "value"],
+            expressions: {'value' : expression}
+        })
+        const cols = await view.to_columns()
+        view.delete()
+
+        const valuekey = doQuantiles ? "quantile" : "value"
+        if (doQuantiles) {
+            const [getquantile, getvalue] = ecdf(cols.value)
+            const quantiles = cols.value.map(getquantile)
+            makeLegend(getvalue)
+            csvmap = new Map(lazyZip(cols.IRIS, quantiles))
+            rawmap = new Map(lazyZip(cols.IRIS, cols.value))
+        } else {
+            makeLegend()
+            csvmap = new Map(lazyZip(cols.IRIS, cols.value))
+        }
+
+        const update = async () => {
+            const layers = [getIrisData(csvmap)]
+            if (params.get('trains') !== null){
+                layers.push(choochoo)
+            }
+            mapOverlay.setProps({layers})
+
+        }
+        update()
+    })
+}
+
+const l = document.getElementById("attribution")
+l.innerText = "© " + ["INSEE", "MapTiler",  "OpenStreetMap contributors", params.get('trains') !== null ? "OpenRailwayMap" : null].filter(x=>x !== null).join(" © ")
+const legendDiv = document.createElement('div')
+legendDiv.id = "observable_legend"
+l.insertBefore(legendDiv, l.firstChild)
+
+if (expression === null ) {
+    const csvdata = (await load("data/iris_data.csv", CSVLoader, {csv: {header: true, dynamicTyping: false}})).data
     csvmap = new Map(csvdata.map(r => [r.IRIS, r.perc_voit]))
     const layers = [getIrisData(csvmap)]
     if (params.get('trains') !== null){
         layers.push(choochoo)
     }
     mapOverlay.setProps({layers})
+    makeLegend()
+} else {
+    hardMode()
 }
-update()
 
-
-window.d3 = d3
-window.observablehq = observablehq
-
-const params = new URLSearchParams(window.location.search)
-const l = document.getElementById("attribution")
-l.innerText = "© " + ["INSEE", "MapTiler",  "OpenStreetMap contributors", params.get('trains') !== null ? "OpenRailwayMap" : null].filter(x=>x !== null).join(" © ")
-// todo: read impressum from metadata too
-async function makeLegend() {
-    // // todo: support metadata again
-    // try {
-    //     const d = await (await fetch("/data/meta.json")).json()
-    //     const fmt = v => d['scale'][Object.keys(d['scale']).map(x => [x, Math.abs(x - v)]).sort((l,r)=>l[1] - r[1])[0][0]]
-    //     l.insertBefore(observablehq.legend({color: colourRamp, title: params.get('t'), tickFormat: fmt}), l.firstChild)
-    // } catch (e) {
-    //     console.warn(e)
-        l.insertBefore(observablehq.legend({color: colourRamp, title: "Fraction of principal residences with zero cars"}), l.firstChild)
-    // }
+function* lazyZip(a, b){
+    if (a.length != b.length) throw new Error("unequal lengths")
+    for (let i = 0; i < a.length; i++) {
+        yield [a[i], b[i]]
+    }
 }
-makeLegend()
+window.lazyZip = lazyZip
+
+async function makeLegend(fmt) {
+    if (fmt !== undefined) {
+        const legend = observablehq.legend({color: colourRamp, title: params.get('t') ?? params.get('expression') ?? "Fraction of principal residences with zero cars", tickFormat: v => parseFloat(fmt(v).toPrecision(3))})
+        legendDiv.innerHTML = ""
+        legendDiv.insertBefore(legend, legendDiv.firstChild)
+    } else {
+        const legend = observablehq.legend({color: colourRamp, title: params.get('t') ?? params.get('expression') ?? "Fraction of principal residences with zero cars"})
+        legendDiv.innerHTML = ""
+        legendDiv.insertBefore(legend, legendDiv.firstChild)
+    }
+}
+
 map.on('moveend', () => {
     const pos = map.getCenter()
     const z = map.getZoom()
     window.location.hash = `x=${pos.lng.toFixed(2)}&y=${pos.lat.toFixed(2)}&z=${z.toFixed(2)}`
 })
+
+
+function ecdf(array){
+    const mini_array = Array.from({length: Math.min(8192, array.length)}, () => Math.floor(Math.random()*array.length)).map(i => array[i]).sort((l,r) => l-r) // sort() sorts alphabetically otherwise
+    const quantile = mini_array.map((v, position) => position + 1).map(v => v/mini_array.length) // +=v to weight by number rather than position
+    return [target => quantile[mini_array.findIndex(v => v > target)] ?? 1, target => mini_array[quantile.findIndex(v => Math.min(Math.max(0.01,v),0.99) > target)] ?? mini_array.slice(-1)[0]] // function to get quantile from value and value from quantile, with fudging to exclude top/bottom 1% from legend
+}

@@ -49,5 +49,32 @@ https://www.insee.fr/fr/statistiques?geo=IRIS-1
 
 Just make sure you have IRIS tiles that correspond to the data you're using
 
+# Hard mode - DIY columns on the fly
+
+You can write an inline expression with the `expression` search parameter using the stupidly powerful [Perspective dialect of ExprTK](https://docs.rs/perspective-client/3.1.6/perspective_client/config/expressions/). You can only display one column. If you don't want to normalise it between 0 and 1, also supply the `quantiles` search param.
+
+If this param is present, it loads the base-logement-2020 dataset into memory.
+
+The data provided is the base-logement-2020 dataset from INSEE - you'll want to view the dictionary of variables here https://www.insee.fr/fr/statistiques/7704078#dictionnaire (French :( )
+
+I converted that dataset to Arrow using Julia but anything would work. Probably.
+
+If anyone knows of a dataset with the IRIS areas computed in square kilometres (or furlongs, whatever), please let me know because I'd love to add it to the table. If I can't find one within a few months and I still have the motivation, I'll compute it myself, but I'd rather not.
+
+## Examples
+
+- rule of thumb is 'everything you would expect to work will work but you gotta stick column names in double quotes'
+
+- you can (obviously?) just display a single column from https://www.insee.fr/fr/statistiques/7704078#dictionnaire if you want
+
+https://o.blanthorn.com/france-iris/map/?expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83 - percentage of households with 2+ cars
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83 - households with 2+ cars scaled by quantiles
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"#x=1.99&y=46.42&z=6.17 - absolute number of second homes
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"/"P20_LOG"#x=1.99&y=46.42&z=6.17 - percentage of dwellings that are second homes scaled by quantiles
+
+# todo
+
+integrate perspective-viewer https://docs.rs/perspective-viewer/latest/perspective_viewer/ and update the map based on the value column
+
 # Copyright
 IRIS tiles copyright INSEE and IGN
