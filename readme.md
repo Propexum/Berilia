@@ -67,10 +67,26 @@ If anyone knows of a dataset with the IRIS areas computed in square kilometres (
 
 - you can (obviously?) just display a single column from https://www.insee.fr/fr/statistiques/7704078#dictionnaire if you want
 
-https://o.blanthorn.com/france-iris/map/?expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83 - percentage of households with 2+ cars
-https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83 - households with 2+ cars scaled by quantiles
-https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"#x=1.99&y=46.42&z=6.17 - absolute number of second homes
-https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"/"P20_LOG"#x=1.99&y=46.42&z=6.17 - percentage of dwellings that are second homes scaled by quantiles
+```md
+
+- percentage of households with 2+ cars
+"P20_RP_VOIT2P/"P20_RP"
+https://o.blanthorn.com/france-iris/map/?expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83
+
+
+- households with 2+ cars scaled by quantiles
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RP_VOIT2P/"P20_RP"#x=0.33&y=47.35&z=6.83
+
+
+- absolute number of second homes
+"P20_RSECOCC"
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"#x=1.99&y=46.42&z=6.17
+
+
+- percentage of dwellings that are second homes scaled by quantiles
+"P20_RSECOCC"/"P20_LOG"
+https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"/"P20_LOG"#x=1.99&y=46.42&z=6.17
+```
 
 # todo
 
