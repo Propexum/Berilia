@@ -69,6 +69,8 @@ If anyone knows of a dataset with the IRIS areas computed in square kilometres (
 
 - you can (obviously?) just display a single column from https://www.insee.fr/fr/statistiques/7704078#dictionnaire if you want
 
+- provide the `t=your legend title goes here` searchparam if you want to take a nice screenie
+
 ```md
 
 - percentage of households with 2+ cars
@@ -94,6 +96,18 @@ https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"/"P20
 - NB the -- trick to get +
 https://o.blanthorn.com/france-iris/map/?quantiles&expression=(2*%22P20_RP_VOIT2P%22--%22P20_RP_VOIT1%22)/%22P20_PMEN%22#x=3.36&y=46.05&z=6.21
 
+- approx average residence construction date
+avg(
+    1900*"P20_RP_ACH19" --
+    1932*"P20_RP_ACH45" --
+    1958*"P20_RP_ACH70" --
+    1980*"P20_RP_ACH90" --
+    1997*"P20_RP_ACH05" --
+    2010*"P20_RP_ACH17" --
+    2019*("P20_RP" - "P20_RP_ACHTOT")
+) / "P20_RP"
+
+https://o.blanthorn.com/france-iris/map/?quantiles&expression=avg(%201900*%22P20_RP_ACH19%22%20--%201932*%22P20_RP_ACH45%22%20--%201958*%22P20_RP_ACH70%22%20--%201980*%22P20_RP_ACH90%22%20--%201997*%22P20_RP_ACH05%22%20--%202010*%22P20_RP_ACH17%22%20--%202019*(%22P20_RP%22%20-%20%22P20_RP_ACHTOT%22)%20)%20/%20%22P20_RP%22#x=4.93&y=45.74&z=11.61
 ```
 
 # todo
