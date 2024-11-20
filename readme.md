@@ -65,6 +65,8 @@ If anyone knows of a dataset with the IRIS areas computed in square kilometres (
 
 - rule of thumb is 'everything you would expect to work will work but you gotta stick column names in double quotes'
 
+- well everything except `+` for reasons i am too lazy to investigate and presumably a dozen other things. for + just use `--` instead ;)
+
 - you can (obviously?) just display a single column from https://www.insee.fr/fr/statistiques/7704078#dictionnaire if you want
 
 ```md
@@ -86,6 +88,12 @@ https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"#x=1.
 - percentage of dwellings that are second homes scaled by quantiles
 "P20_RSECOCC"/"P20_LOG"
 https://o.blanthorn.com/france-iris/map/?quantiles&expression="P20_RSECOCC"/"P20_LOG"#x=1.99&y=46.42&z=6.17
+
+
+- approx number of cars per capita (capped at 2 per household, principal residence in numerator, total population(?) denominator)
+- NB the -- trick to get +
+https://o.blanthorn.com/france-iris/map/?quantiles&expression=(2*%22P20_RP_VOIT2P%22--%22P20_RP_VOIT1%22)/%22P20_PMEN%22#x=3.36&y=46.05&z=6.21
+
 ```
 
 # todo
