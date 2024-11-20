@@ -3,9 +3,9 @@ import {MVTLayer, TileLayer} from '@deck.gl/geo-layers'
 import {BitmapLayer} from '@deck.gl/layers'
 import {CSVLoader} from '@loaders.gl/csv'
 import {load} from '@loaders.gl/core'
+import '@finos/perspective-viewer/dist/css/pro.css'
 import maplibregl from 'maplibre-gl'
 import * as d3 from 'd3'
-import 'maplibre-gl/dist/maplibre-gl.css'
 import * as observablehq from './vendor/observablehq' // from https://observablehq.com/@d3/color-legend
 
 let STYLE = ""
@@ -124,6 +124,12 @@ const doQuantiles = params.get('quantiles') != null
 async function hardMode() {
     const perspective = await import('@finos/perspective')
     await import('@finos/perspective-viewer')
+    await import('@finos/perspective-viewer-datagrid')
+    await import('@finos/perspective-viewer-d3fc')
+
+    const viewer = document.createElement("perspective-viewer")
+    document.getElementById("foo").appendChild(viewer)
+    window.viewer = viewer
     perspective.worker().then(async (worker) => {
         window.w = worker
         const arrow = await fetch("data/base-ic-logement-2020.arrow")
@@ -160,6 +166,7 @@ async function hardMode() {
 
         }
         update()
+        viewer.load(table)
     })
 }
 

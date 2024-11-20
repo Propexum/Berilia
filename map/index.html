@@ -1,18 +1,26 @@
 <!doctype html>
 <html>
     <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/themes/light.css" />
+        <link rel="stylesheet" href="app.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/shoelace-autoloader.js"></script>
         <link rel="icon" href="cow.svg"/>
         <link rel="icon" href="cow-light.svg" type="image/x-icon" media="(prefers-color-scheme: dark)">
         <link rel="icon" href="cow.svg" type="image/x-icon" media="(prefers-color-scheme: light)">
         <meta charset='UTF-8' />
         <title>French IRIS tiles</title>
         <style>
+:root {
+    --sl-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: var(--sl-font-sans);
+}
 #map {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    width: 50%;
 }
 #deckgl-overlay {
     mix-blend-mode: multiply;
@@ -30,6 +38,14 @@
     font-size: 8pt;
     border-radius: 0px;
 }
+perspective-viewer { 
+    position: absolute; 
+    top: 0; 
+    left: 50%; 
+    right: 0; 
+    bottom: 0; 
+    width: 50%;
+}
 
 
         </style>
@@ -39,6 +55,73 @@
         <div id="map">
             <div id="legend"></div>
             <div id="attribution"></div>
+        </div>
+        <div id="foo">
+        </div>
+        <div id="widgets">
+            <!-- https://shoelace.style/getting-started/usage -->
+            <sl-drawer contained="true" id="settings" label="Population around a tile" placement="left">
+                <sl-range id="desired_radius" label="Radius (number of hexagons)" min=1 max=200 step=1 value=15></sl-range>
+                <p><small><a href="./?trains">click here for map with railways</a></small></p>
+                <div id="results">
+                    <p id="results_text">click somewhere on the map to get the population and population density within the selected radius</p>
+                    <sl-details summary="faq/info/why">
+                        <div id="waffle">
+                            <pre>
+what does "density weighted by population" mean?
+    it is the density that the median person lives at, which is the density you should probably
+    care about if you care about how people live and behave. people care about people. so should you.
+
+why can't i use the map zoomed out on my phone?
+    more zoomed out levels use a lot of memory. if you ask for the desktop site in your browser you'll
+    be able to zoom out more but your phone will probably kill the page. especially on safari/ios.
+
+what does "density weighted by populated land area" mean?
+    it's more like the boring normal measure of density of population/land area. but it excludes
+    totally unpopulated areas of land because it was like half a line of code less to do that
+    and people don't live in the sea.
+
+when i move around the map why is it empty?
+    i coded the streaming part pretty lazily. just stop moving the map a second and it will load in.
+
+i want it to be faster when the radius is big
+    use a better computer like a desktop
+
+why is only europe covered?
+    i need a better computer or the time to think about how to do it without needing ~100GB of RAM
+    to convert that global population layer tiff to h3. i started work on it here
+    https://github.com/bovine3dom/grid2h3 but good luck deciphering it
+
+something else is broken and i want to complain
+    file an issue https://github.com/bovine3dom/population-around-a-tile
+
+how does it work?
+    nerd. code at https://github.com/bovine3dom/population-around-a-tile
+
+        - jrc population 1km (2018 coz that version includes the uk) grid reprojected to h3 with code
+          that i scribbled down in https://github.com/bovine3dom/grid2h3
+
+        - that repo splits the data into a hive style directory structure so it can be streamed to
+          the browser without needing anything more than a dumb web server
+
+        - then deck.gl is used for visualisation with a maplibre map and a nice tileset from maptiler
+
+        - arquero is used to calculate the statistics on the selected tiles
+
+        - shoelace is used for the UI
+
+why did you do this?
+    1) i like hexagons
+    2) i think people generally talk about population density in a pretty silly way
+        (yes i am talking about the "the uk is full" people when we have pretty low population density)
+    3) https://www.tomforth.co.uk/circlepopulations/ reminded me that toys are better than graphs for changing minds
+
+                            </pre>
+                        </div>
+                    </sl-details>
+                </div>
+            </sl-drawer>
+            <sl-button size="small" onclick="document.getElementById('settings').show()">📊</sl-button>
         </div>
         <script type="module" src='app.js'></script>
     </body>
