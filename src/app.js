@@ -121,6 +121,8 @@ window.d3 = d3
 window.observablehq = observablehq
 const doQuantiles = getParams().get('quantiles') != null
 async function hardMode() {
+    // delete button if it's there
+    document.getElementById("loadviewer")?.remove()
     const perspective = await import('@finos/perspective')
     await import('@finos/perspective-viewer')
     await import('@finos/perspective-viewer-datagrid')
@@ -136,6 +138,7 @@ async function hardMode() {
         const table = await w.table(arrowData)
         window.table = table
         viewer.load(table)
+        viewer.restore({settings:true, expressions: {chloropleth: getParams().get('expression') ?? '1 - ("P20_RP_VOIT1P" / "P20_RP")'}})
 
         perspectiveUpdate()
         viewer.addEventListener("perspective-config-update", x=> {
@@ -249,8 +252,6 @@ async function grabExpressions(){
 // add click event listener to loadviewer button
 document.getElementById("loadviewer").addEventListener("click", () => {
     hardMode()
-    // delete button
-    document.getElementById("loadviewer").remove()
 })
 
 window.grabExpressions = grabExpressions
