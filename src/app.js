@@ -16,7 +16,7 @@ if (window.location.hostname == 'localhost'){
 } else {
     STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" // fall back to CARTO
 }
-const start_pos = {...{x: 0.45, y: 51.47, z: 4}, ...Object.fromEntries(new URLSearchParams(window.location.hash.slice(1)))}
+const start_pos = {...{x: 1.43, y: 46.65, z: 6}, ...Object.fromEntries(new URLSearchParams(window.location.hash.slice(1)))}
 const map = new maplibregl.Map({
     container: 'map',
     style: STYLE,
