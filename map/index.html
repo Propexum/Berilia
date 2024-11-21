@@ -1,12 +1,19 @@
 <!doctype html>
 <html>
     <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/themes/light.css" />
+        <link rel="stylesheet" href="app.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/shoelace-autoloader.js"></script>
         <link rel="icon" href="cow.svg"/>
         <link rel="icon" href="cow-light.svg" type="image/x-icon" media="(prefers-color-scheme: dark)">
         <link rel="icon" href="cow.svg" type="image/x-icon" media="(prefers-color-scheme: light)">
         <meta charset='UTF-8' />
         <title>French IRIS tiles</title>
         <style>
+:root {
+    --sl-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: var(--sl-font-sans);
+}
 #map {
     position: fixed;
     top: 0;
@@ -31,6 +38,22 @@
     border-radius: 0px;
 }
 
+#settings {
+    --squishtothis: 125px;
+}
+perspective-viewer { 
+    height: calc(100% - var(--squishtothis));
+}
+
+#squishme {
+    height: var(--squishtothis);
+}
+
+#settings::part(panel) {
+    height: 100%;
+    width: 50%;
+}
+
 
         </style>
 <!-- #legend { position: absolute; z-index: 1; background-color: rgba(255, 255, 255, 0.6); color: rgba(0, 0, 0, 0.6); top: 0; right: 0; font-family: "Helvetica Neue", "sans-serif"; font-size: 8pt; border-radius: 0px; } #legend text { stroke: white; stroke-width: 2px; paint-order: stroke; } -->
@@ -39,6 +62,19 @@
         <div id="map">
             <div id="legend"></div>
             <div id="attribution"></div>
+        </div>
+        <div id="foo">
+        </div>
+        <div id="widgets">
+            <!-- https://shoelace.style/getting-started/usage -->
+            <sl-drawer contained="true" id="settings" label="Data explorer" placement="left">
+                <div id="squishme">
+                    <p>To plot something on the map, hover over the table, click "configure", scroll down to "new column", rename it to the magic column name "chloropleth" (by clicking "New Column 1" next to fx at the top), write <a href=https://docs.rs/perspective-client/3.1.6/perspective_client/config/expressions/ target="_blank">an expression</a> such as "P20_RP_LOC"/"P20_RP" and click create.</p>
+                    <p>Documentation for each column is available in French on <a href=https://www.insee.fr/fr/statistiques/7704078#dictionnaire target="_blank"> the INSEE website</a>.</p>
+                </div>
+                <sl-button id="loadviewer">Load data viewer (~50MB download)</sl-button>
+            </sl-drawer>
+            <sl-button size="small" onclick="document.getElementById('settings').show()">📊</sl-button>
         </div>
         <script type="module" src='app.js'></script>
     </body>
