@@ -73,11 +73,6 @@ avg(
 https://o.blanthorn.com/france-iris/map/?quantiles&expression=avg(%201900*%22P20_RP_ACH19%22%20--%201932*%22P20_RP_ACH45%22%20--%201958*%22P20_RP_ACH70%22%20--%201980*%22P20_RP_ACH90%22%20--%201997*%22P20_RP_ACH05%22%20--%202010*%22P20_RP_ACH17%22%20--%202019*(%22P20_RP%22%20-%20%22P20_RP_ACHTOT%22)%20)%20/%20%22P20_RP%22#x=4.93&y=45.74&z=11.61
 ```
 
-# todo
-
-integrate perspective-viewer https://docs.rs/perspective-viewer/latest/perspective_viewer/ and update the map based on the value column
-
-
 # Development
 
 ## How to run
