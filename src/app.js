@@ -64,7 +64,7 @@ function getTooltip({object}) {
     const toDivs = kv => {
         return `<div>${kv[0]}: ${typeof(kv[1]) == "number" ? parseFloat(kv[1].toPrecision(3)) : kv[1]}</div>` // parseFloat is a hack to bin scientific notation
     }
-    const keyname = expression ?? "percent_zero_voitures"
+    const keyname = getParams().get('expression') ?? "percent_zero_voitures"
     const tooltip = doQuantiles ? 
         Object.entries({...object.properties, [keyname]: rawmap?.get(object.properties.CODE_IRIS), [keyname + "_quantile"]: csvmap?.get(object.properties.CODE_IRIS)}).map(toDivs).join(" ")
         : Object.entries({...object.properties, [keyname]: csvmap?.get(object.properties.CODE_IRIS)}).map(toDivs).join(" ")
@@ -114,13 +114,12 @@ const choochoo = new TileLayer({
 let csvmap = new Map()
 let rawmap = new Map()
 window.csvmap = csvmap
-const params = new URLSearchParams(window.location.search)
-const expression = params.get('expression') 
-
+const getParams = () => new URLSearchParams(window.location.search)
+// event listener to url change to keep params updated
 
 window.d3 = d3
 window.observablehq = observablehq
-const doQuantiles = params.get('quantiles') != null
+const doQuantiles = getParams().get('quantiles') != null
 async function hardMode() {
     const perspective = await import('@finos/perspective')
     await import('@finos/perspective-viewer')
@@ -136,51 +135,67 @@ async function hardMode() {
         const arrowData = await arrow.arrayBuffer()
         const table = await w.table(arrowData)
         window.table = table
-
-        const expression = params.get('expression') ?? '1 - ("P20_RP_VOIT1P" / "P20_RP")' // technically unreachable but osef
-        const view = await table.view({
-            columns: ["IRIS", "value"],
-            expressions: {'value' : expression}
-        })
-        const cols = await view.to_columns()
-        view.delete()
-
-        const valuekey = doQuantiles ? "quantile" : "value"
-        if (doQuantiles) {
-            const [getquantile, getvalue] = ecdf(cols.value)
-            const quantiles = cols.value.map(getquantile)
-            makeLegend(getvalue)
-            csvmap = new Map(lazyZip(cols.IRIS, quantiles))
-            rawmap = new Map(lazyZip(cols.IRIS, cols.value))
-        } else {
-            makeLegend()
-            csvmap = new Map(lazyZip(cols.IRIS, cols.value))
-        }
-
-        const update = async () => {
-            const layers = [getIrisData(csvmap)]
-            if (params.get('trains') !== null){
-                layers.push(choochoo)
-            }
-            mapOverlay.setProps({layers})
-
-        }
-        update()
         viewer.load(table)
+
+        perspectiveUpdate()
+        viewer.addEventListener("perspective-config-update", x=> {
+            if (x?.detail?.expressions?.chloropleth != prevExpression) {
+                // update search param
+                const url = new URL(window.location)
+                url.searchParams.set('expression', x?.detail?.expressions?.chloropleth)
+                history.replaceState({}, "", url.toString())
+                prevExpression = x?.detail?.expressions?.chloropleth
+                perspectiveUpdate()
+            }
+        })
     })
 }
 
+async function perspectiveUpdate(){
+    mapOverlay.setProps({layers: []}) // force a refresh
+    const expression = (await grabExpressions())?.chloropleth ?? getParams().get('expression') ?? '1 - ("P20_RP_VOIT1P" / "P20_RP")' // technically unreachable but osef
+    const view = await table.view({
+        columns: ["IRIS", "value"],
+        expressions: {'value' : expression}
+    })
+    const cols = await view.to_columns()
+    view.delete()
+
+    const valuekey = doQuantiles ? "quantile" : "value"
+    if (doQuantiles) {
+        const [getquantile, getvalue] = ecdf(cols.value)
+        const quantiles = cols.value.map(getquantile)
+        makeLegend(getvalue)
+        csvmap = new Map(lazyZip(cols.IRIS, quantiles))
+        rawmap = new Map(lazyZip(cols.IRIS, cols.value))
+    } else {
+        makeLegend()
+        csvmap = new Map(lazyZip(cols.IRIS, cols.value))
+    }
+
+    const layers = [getIrisData(csvmap)]
+    if (getParams().get('trains') !== null){
+        layers.push(choochoo)
+    }
+    mapOverlay.setProps({layers})
+}
+window.perspectiveUpdate = perspectiveUpdate
+// // will need to add a check for changes on this
+// x.detail.expressions
+// // can't just reload every time or it'll get slow
+let prevExpression = null
+
 const l = document.getElementById("attribution")
-l.innerText = "© " + ["INSEE", "MapTiler",  "OpenStreetMap contributors", params.get('trains') !== null ? "OpenRailwayMap" : null].filter(x=>x !== null).join(" © ")
+l.innerText = "© " + ["INSEE", "MapTiler",  "OpenStreetMap contributors", getParams().get('trains') !== null ? "OpenRailwayMap" : null].filter(x=>x !== null).join(" © ")
 const legendDiv = document.createElement('div')
 legendDiv.id = "observable_legend"
 l.insertBefore(legendDiv, l.firstChild)
 
-if (expression === null ) {
+if (getParams().get('expression') === null ) {
     const csvdata = (await load("data/iris_data.csv", CSVLoader, {csv: {header: true, dynamicTyping: false}})).data
     csvmap = new Map(csvdata.map(r => [r.IRIS, r.perc_voit]))
     const layers = [getIrisData(csvmap)]
-    if (params.get('trains') !== null){
+    if (getParams().get('trains') !== null){
         layers.push(choochoo)
     }
     mapOverlay.setProps({layers})
@@ -199,11 +214,11 @@ window.lazyZip = lazyZip
 
 async function makeLegend(fmt) {
     if (fmt !== undefined) {
-        const legend = observablehq.legend({color: colourRamp, title: params.get('t') ?? params.get('expression') ?? "Fraction of principal residences with zero cars", tickFormat: v => parseFloat(fmt(v).toPrecision(3))})
+        const legend = observablehq.legend({color: colourRamp, title: getParams().get('t') ?? getParams().get('expression') ?? "Fraction of principal residences with zero cars", tickFormat: v => parseFloat(fmt(v).toPrecision(3))})
         legendDiv.innerHTML = ""
         legendDiv.insertBefore(legend, legendDiv.firstChild)
     } else {
-        const legend = observablehq.legend({color: colourRamp, title: params.get('t') ?? params.get('expression') ?? "Fraction of principal residences with zero cars"})
+        const legend = observablehq.legend({color: colourRamp, title: getParams().get('t') ?? getParams().get('expression') ?? "Fraction of principal residences with zero cars"})
         legendDiv.innerHTML = ""
         legendDiv.insertBefore(legend, legendDiv.firstChild)
     }
@@ -226,3 +241,16 @@ function ecdf(array){
     }
     return [target => quantile[mini_array.findIndex(v => v > target)] ?? 1, getvalue] // function to get quantile from value and value from quantile, with fudging to exclude top/bottom 1% from legend
 }
+
+async function grabExpressions(){
+    return (await viewer.save())?.expressions
+}
+
+// add click event listener to loadviewer button
+document.getElementById("loadviewer").addEventListener("click", () => {
+    hardMode()
+    // delete button
+    document.getElementById("loadviewer").remove()
+})
+
+window.grabExpressions = grabExpressions
