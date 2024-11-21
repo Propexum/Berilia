@@ -12,7 +12,11 @@ A simple data vis tool using MapLibre GL and deck.gl to display data from a CSV 
 
 # Usage
 
-![demo video](promo/iris-column.mp4)
+<!-- ![demo video](promo/iris-column.mp4) -->
+
+https://github.com/user-attachments/assets/9cb1122e-82ff-43d9-8470-0501b5302360
+
+
 
 You can use the stupidly powerful [Perspective dialect of ExprTK](https://docs.rs/perspective-client/3.1.6/perspective_client/config/expressions/) to query the data and plot on the map. You can only display one column. If you don't want to normalise it between 0 and 1, supply the `quantiles` search param in the URL.
 
