@@ -20,7 +20,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    width: 50%;
 }
 #deckgl-overlay {
     mix-blend-mode: multiply;
@@ -38,12 +37,20 @@
     font-size: 8pt;
     border-radius: 0px;
 }
+
+#settings {
+    --squishtothis: 200px;
+}
 perspective-viewer { 
-    position: absolute; 
-    top: 0; 
-    left: 50%; 
-    right: 0; 
-    bottom: 0; 
+    height: calc(100% - var(--squishtothis));
+}
+
+#squishme {
+    height: var(--squishtothis);
+}
+
+#settings::part(panel) {
+    height: 100%;
     width: 50%;
 }
 
@@ -61,6 +68,7 @@ perspective-viewer {
         <div id="widgets">
             <!-- https://shoelace.style/getting-started/usage -->
             <sl-drawer contained="true" id="settings" label="Population around a tile" placement="left">
+                <div id="squishme">
                 <sl-range id="desired_radius" label="Radius (number of hexagons)" min=1 max=200 step=1 value=15></sl-range>
                 <p><small><a href="./?trains">click here for map with railways</a></small></p>
                 <div id="results">
@@ -119,6 +127,7 @@ why did you do this?
                             </pre>
                         </div>
                     </sl-details>
+                </div>
                 </div>
             </sl-drawer>
             <sl-button size="small" onclick="document.getElementById('settings').show()">📊</sl-button>

@@ -128,7 +128,7 @@ async function hardMode() {
     await import('@finos/perspective-viewer-d3fc')
 
     const viewer = document.createElement("perspective-viewer")
-    document.getElementById("foo").appendChild(viewer)
+    document.getElementById("settings").appendChild(viewer)
     window.viewer = viewer
     perspective.worker().then(async (worker) => {
         window.w = worker
