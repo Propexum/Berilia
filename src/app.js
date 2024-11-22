@@ -133,7 +133,7 @@ async function hardMode() {
     window.viewer = viewer
     perspective.worker().then(async (worker) => {
         window.w = worker
-        const arrow = await fetch("data/base-ic-logement-2020.arrow")
+        const arrow = (getParams().get('bigdata') !== null) ? await fetch("data/big.arrow") : await fetch("data/base-ic-logement-2020.arrow")
         const arrowData = await arrow.arrayBuffer()
         const table = await w.table(arrowData)
         window.table = table
