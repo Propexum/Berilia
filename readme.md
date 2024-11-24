@@ -22,8 +22,6 @@ The data provided is the base-logement-2020 dataset from INSEE - you'll want to 
 
 I converted that dataset to Arrow using Julia but anything would work. Probably.
 
-If anyone knows of a dataset with the IRIS areas computed in square kilometres (or furlongs, whatever), please let me know because I'd love to add it to the table. If I can't find one within a few months and I still have the motivation, I'll compute it myself, but I'd rather not.
-
 ## Examples
 
 - rule of thumb is 'everything you would expect to work will work but you gotta stick column names in double quotes'
