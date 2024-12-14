@@ -1,0 +1,24 @@
+# Build time configuration
+# Put your own config in config.toml in the root of the project which is ignored by .gitignore
+
+# NB: everything needs to be double quoted and all keys are mandatory
+CONFIG_TILES_DIRECTORY = "'data/shapefiles/CONTOURS-IRIS_2-1_SHP_LAMB93_FXX-2020/tiles/{z}/{x}/{y}.pbf'"
+CONFIG_GEOMETRY_PROPERTY = "'CODE_IRIS'"
+CONFIG_COLUMN_NAME = "'IRIS'"
+CONFIG_DATASET_SMALL = "'data/base-ic-logement-2020.arrow'"
+CONFIG_DATASET_BIG = "'data/big.arrow'"
+CONFIG_ATTRIBUTION = "'INSEE|MapTiler|OpenStreetMap contributors'"
+# test with 
+# http://localhost:1983/?quantiles=&expression=%22P20_RP_VOIT2P%22%2F%22P20_RP%22#x=4.73&y=44.94&z=6.98
+
+
+# # Example with UK ONS census data instead (bring your own data)
+# CONFIG_TILES_DIRECTORY = "'data/shapefiles/uk/oa/tiles/{z}/{x}/{y}.pbf'"
+# CONFIG_GEOMETRY_PROPERTY = "'OA21CD'"
+# CONFIG_COLUMN_NAME = "'OA21CD'"
+# CONFIG_DATASET_SMALL = "'data/uk.arrow'"
+# CONFIG_DATASET_BIG = "'data/uk.arrow'"
+# CONFIG_ATTRIBUTION = "'ONS|MapTiler|OpenStreetMap contributors'"
+
+# test with
+# http://localhost:1983/?trains=&quantiles=&expression=%0A%281*%22Number+of+rooms+%28VOA%29%3A+1+room%22+%2B+%0A2*%22Number+of+rooms+%28VOA%29%3A+2+rooms%22+%2B+%0A3*%22Number+of+rooms+%28VOA%29%3A+3+rooms%22+%2B+%0A4*%22Number+of+rooms+%28VOA%29%3A+4+rooms%22+%2B+%0A5*%22Number+of+rooms+%28VOA%29%3A+5+rooms%22+%2B+%0A6*%22Number+of+rooms+%28VOA%29%3A+6+rooms%22+%2B+%0A7*%22Number+of+rooms+%28VOA%29%3A+7+rooms%22+%2B+%0A7*%22Number+of+rooms+%28VOA%29%3A+8+rooms%22+%2B+%0A9*%22Number+of+rooms+%28VOA%29%3A+9+or+more+rooms%22%29%2F%0A%22Number+of+rooms+%28VOA%29%3A+Total%3A+All+households%22#x=-0.18&y=52.68&z=7.91

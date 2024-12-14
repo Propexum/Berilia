@@ -4,7 +4,7 @@
 
 [or click here to view with railways superimposed](https://o.blanthorn.com/france-iris/map/?trains#x=4.844466734284424&y=45.75895982567425&z=13.537551815531074)
 
-A simple data vis tool using MapLibre GL and deck.gl to display data from a CSV or Arrow file joined with the French INSEE IRIS divisions of communes (approx ~3,000 people per area)
+A simple data vis tool using MapLibre GL and deck.gl to display data from a CSV or Arrow file joined with the French INSEE IRIS divisions of communes (approx ~3,000 people per area). Dataset and tiles experimentally configurable - see `config_default.toml`.
 
 <p align="center">
 <img src="promo/demo.png" alt="Chloropleth map of Paris showing percentage of principal residences without cars">

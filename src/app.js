@@ -8,6 +8,17 @@ import maplibregl from 'maplibre-gl'
 import * as d3 from 'd3'
 import * as observablehq from './vendor/observablehq' // from https://observablehq.com/@d3/color-legend
 
+const CONFIG = {
+    tiles_directory: CONFIG_TILES_DIRECTORY,
+    geometry_property: CONFIG_GEOMETRY_PROPERTY,
+    column_name: CONFIG_COLUMN_NAME,
+    dataset_small: CONFIG_DATASET_SMALL,
+    dataset_big: CONFIG_DATASET_BIG,
+    attribution: CONFIG_ATTRIBUTION,
+}
+
+console.log("config is:", CONFIG)
+
 let STYLE = ""
 if (window.location.hostname == 'localhost'){
     STYLE = "https://api.maptiler.com/maps/toner-v2/style.json?key=Y4leWPnhJFGnTFFk1cru"
@@ -47,14 +58,15 @@ const getIrisData = csvmap => {
     id: 'IrisLayer',
     minZoom: 6,
     maxZoom: 9,
-    data: 'data/shapefiles/CONTOURS-IRIS_2-1_SHP_LAMB93_FXX-2020/tiles/{z}/{x}/{y}.pbf',
+    data: CONFIG.tiles_directory,
     extruded: false,
     stroked: true,
     getFillColor: d => {
-        const codes = d.properties.CODE_IRIS.split(",")
+        const codes = d.properties[CONFIG.geometry_property].split(",")
         const vs = codes.map(x => csvmap.get(x))
         const v = median(vs)
         return v == undefined ? [255, 255, 255, 0] : getColour(v)
+        // return [Math.random() * 255, Math.random() * 255, Math.random() * 255, 255]
     },
     pickable: true
 })}
@@ -66,8 +78,8 @@ function getTooltip({object}) {
     }
     const keyname = getParams().get('expression') ?? "percent_zero_voitures"
     const tooltip = doQuantiles ? 
-        Object.entries({...object.properties, [keyname]: rawmap?.get(object.properties.CODE_IRIS), [keyname + "_quantile"]: csvmap?.get(object.properties.CODE_IRIS)}).map(toDivs).join(" ")
-        : Object.entries({...object.properties, [keyname]: csvmap?.get(object.properties.CODE_IRIS)}).map(toDivs).join(" ")
+        Object.entries({...object.properties, [keyname]: rawmap?.get(object.properties[CONFIG.geometry_property]), [keyname + "_quantile"]: csvmap?.get(object.properties[CONFIG.geometry_property])}).map(toDivs).join(" ")
+        : Object.entries({...object.properties, [keyname]: csvmap?.get(object.properties[CONFIG.geometry_property])}).map(toDivs).join(" ")
     return {
         html: tooltip,
         style: {
@@ -133,7 +145,7 @@ async function hardMode() {
     window.viewer = viewer
     perspective.worker().then(async (worker) => {
         window.w = worker
-        const arrow = (getParams().get('bigdata') !== null) ? await fetch("data/big.arrow") : await fetch("data/base-ic-logement-2020.arrow")
+        const arrow = (getParams().get('bigdata') !== null) ? await fetch(CONFIG.dataset_big) : await fetch(CONFIG.dataset_small)
         const arrowData = await arrow.arrayBuffer()
         const table = await w.table(arrowData)
         window.table = table
@@ -158,7 +170,7 @@ async function perspectiveUpdate(){
     mapOverlay.setProps({layers: []}) // force a refresh
     const expression = (await grabExpressions())?.chloropleth ?? getParams().get('expression') ?? '1 - ("P20_RP_VOIT1P" / "P20_RP")' // technically unreachable but osef
     const view = await table.view({
-        columns: ["IRIS", "value"],
+        columns: [CONFIG.column_name, "value"],
         expressions: {'value' : expression}
     })
     const cols = await view.to_columns()
@@ -169,11 +181,11 @@ async function perspectiveUpdate(){
         const [getquantile, getvalue] = ecdf(cols.value)
         const quantiles = cols.value.map(getquantile)
         makeLegend(getvalue)
-        csvmap = new Map(lazyZip(cols.IRIS, quantiles))
-        rawmap = new Map(lazyZip(cols.IRIS, cols.value))
+        csvmap = new Map(lazyZip(cols[CONFIG.column_name], quantiles))
+        rawmap = new Map(lazyZip(cols[CONFIG.column_name], cols.value))
     } else {
         makeLegend()
-        csvmap = new Map(lazyZip(cols.IRIS, cols.value))
+        csvmap = new Map(lazyZip(cols[CONFIG.column_name], cols.value))
     }
 
     const layers = [getIrisData(csvmap)]
@@ -189,11 +201,12 @@ window.perspectiveUpdate = perspectiveUpdate
 let prevExpression = null
 
 const l = document.getElementById("attribution")
-l.innerText = "© " + ["INSEE", "MapTiler",  "OpenStreetMap contributors", getParams().get('trains') !== null ? "OpenRailwayMap" : null].filter(x=>x !== null).join(" © ")
+l.innerText = "© " + [...CONFIG.attribution.split('|'), getParams().get('trains') !== null ? "OpenRailwayMap" : null].filter(x=>x !== null).join(" © ")
 const legendDiv = document.createElement('div')
 legendDiv.id = "observable_legend"
 l.insertBefore(legendDiv, l.firstChild)
 
+// TODO: make this configurable with config.toml
 if (getParams().get('expression') === null ) {
     const csvdata = (await load("data/iris_data.csv", CSVLoader, {csv: {header: true, dynamicTyping: false}})).data
     csvmap = new Map(csvdata.map(r => [r.IRIS, r.perc_voit]))
