@@ -1,10 +1,8 @@
-# French IRIS tiled map
+# Berilia 🐘: a static site generator for visualising geospatial data
 
-[View live here!](https://o.blanthorn.com/france-iris/map/#x=4.844466734284424&y=45.75895982567425&z=13.537551815531074)
+[View live demo here (click the chart in the top left to play around!)](https://o.blanthorn.com/france-iris/map/#x=4.844466734284424&y=45.75895982567425&z=13.537551815531074)
 
-[or click here to view with railways superimposed](https://o.blanthorn.com/france-iris/map/?trains#x=4.844466734284424&y=45.75895982567425&z=13.537551815531074)
-
-A simple data vis tool using MapLibre GL and deck.gl to display data from a CSV or Arrow file joined with the French INSEE IRIS divisions of communes (approx ~3,000 people per area). Dataset and tiles experimentally configurable - see `config_default.toml`.
+An 👷 experimental 👷 data vis tool using MapLibre GL, deck.gl and Perspective to display and explore geospatial data from CSV or Arrow files. See `config_default.toml` to configure for your own data.
 
 <p align="center">
 <img src="promo/demo.png" alt="Chloropleth map of Paris showing percentage of principal residences without cars">
@@ -79,14 +77,11 @@ Prerequisites: yarn. A web browser. A CSV file of IRIS code, value.
 
 0. `git clone`
 1. `yarn install`
-2. bung data in `./www/data/iris_data.csv` with numeric IRIS code, values normalised from 0-1
+2.  `cp config_default.toml config.toml && $EDITOR config.toml`
 3. `yarn serve&; yarn watch`, open localhost:1983
 4. reload page to reload data
 
-(nb: at the moment the value column is called perc_voit and the tooltip hardcodes it as percent_zero_voitures)
-
-
-## Dealing with France
+## Worked example: France
 
 IRIS contour shapefiles come from https://geoservices.ign.fr/contoursiris and then need some wrangling
 
